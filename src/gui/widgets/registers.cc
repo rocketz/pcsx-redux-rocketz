@@ -109,8 +109,7 @@ void PCSX::Widgets::Registers::updateRegisterValue(PCSX::psxRegisters* registers
     char* endPtr;
     if (radix == 16) {
         newReg = strtoul(val.c_str(), &endPtr, 16);
-    }
-    else {
+    } else {
         newReg = strtoll(val.c_str(), &endPtr, 10);
     }
     if (!*endPtr) {
@@ -200,8 +199,7 @@ void PCSX::Widgets::Registers::draw(PCSX::GUI* gui, PCSX::psxRegisters* register
             ImGui::Text("pc:");
             ImGui::SameLine();
             std::string valPC = fmt::format("{0:08x}", registers->pc);
-            if (ImGui::InputText("##pc", &valPC, ImGuiInputTextFlags_CharsDecimal | ImGuiInputTextFlags_EnterReturnsTrue |
-                                     ImGuiInputTextFlags_AutoSelectAll)) {
+            if (ImGui::InputText("##pc", &valPC, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll)) {
                 updateRegisterValue(registers, valPC, counter, 16);
             }
             contextMenu("##pc", registers->pc, 16);
@@ -411,8 +409,7 @@ void PCSX::Widgets::Registers::draw(PCSX::GUI* gui, PCSX::psxRegisters* register
             ImGui::SameLine();
             ImGui::PushItemWidth(100);
             std::string val = fmt::format("{0:08x}", registers->pc);
-            if (ImGui::InputText("##pc", &val,                                 
-                                     ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue |
+            if (ImGui::InputText("##pc", &val, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue |
                                      ImGuiInputTextFlags_AutoSelectAll)) {
                 updateRegisterValue(registers, val, 34, 16);
             }
@@ -502,49 +499,4 @@ void PCSX::Widgets::Registers::draw(PCSX::GUI* gui, PCSX::psxRegisters* register
     }
 
     ImGui::End();
-
-    if (!m_editorToOpen.empty()) {
-        ImGui::OpenPopup(m_editorToOpen.c_str());
-        m_editorToOpen = "";
-    }
-    for (unsigned counter = 0; counter < 35; counter++) {
-        const char* name;
-        if (counter >= 32) {
-            switch (counter) {
-                case 32:
-                    name = "hi";
-                    break;
-                case 33:
-                    name = "lo";
-                    break;
-                case 34:
-                    name = "pc";
-                    break;
-                default:
-                    name = "??";
-                    break;
-            }
-        } else {
-            name = PCSX::Disasm::s_disRNameGPR[counter];
-        }
-        std::string editor = fmt::format(f_("Edit value of {}"), name);
-        if (ImGui::BeginPopupModal(editor.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text(_("Change the value of register %s:"), name);
-            if (ImGui::InputText(_("Register"), m_registerEditor, 20,
-                                 ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_EnterReturnsTrue)) {
-                char* endPtr;
-                uint32_t newReg = strtoul(m_registerEditor, &endPtr, 16);
-                if (!*endPtr) {
-                    if (counter == 34) {
-                        registers->pc = newReg;
-                    } else {
-                        registers->GPR.r[counter] = newReg;
-                    }
-                    ImGui::CloseCurrentPopup();
-                }
-            }
-            if (ImGui::Button(_("Cancel"))) ImGui::CloseCurrentPopup();
-            ImGui::EndPopup();
-        }
-    }
 }

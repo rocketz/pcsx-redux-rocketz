@@ -44,10 +44,7 @@ class Registers {
         return static_cast<float>(value) / static_cast<float>(1 << Fract);
     }
 
-    unsigned m_selected = 0;
     bool m_showFixed = false;
-    char m_registerEditor[20];
-    std::string m_editorToOpen;
 };
 
 }  // namespace Widgets
